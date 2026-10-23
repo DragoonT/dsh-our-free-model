@@ -136,8 +136,9 @@
     "@deepseek-ai/schemastery": "^3.18.4"
   },
   "devDependencies": {
-    "undici": "8.11.2",
+    "dsh-llm-legacy": "npm:@deepseek-ai/dsh-llm@^0.1.5-rc.2",
+    "esbuild": "0.25.9",
     "typescript": "^5.9.2",
-    "esbuild": "0.25.9"
+    "undici": "8.11.2"
   }
 }
