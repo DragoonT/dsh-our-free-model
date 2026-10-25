@@ -28,6 +28,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import crypto from 'node:crypto'
+import { restrictPermissions } from './private-file.js'
 
 const REPO = 'Ebony-Vinyl/dsh-our-free-model'
 /** This package's own name, as a package manager records it in the profile. */
@@ -1004,6 +1005,7 @@ export class PluginUpdater {
     fs.mkdirSync(this.deps.dataDir, { recursive: true })
     const pending = `${this.stateFile}.tmp`
     fs.writeFileSync(pending, JSON.stringify(state), { mode: 0o600 })
+    restrictPermissions(pending)
     fs.renameSync(pending, this.stateFile)
   }
 
