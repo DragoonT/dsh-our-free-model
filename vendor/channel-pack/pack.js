@@ -59645,6 +59645,9 @@ function windowsProxyFor(target, config) {
 }
 var ChannelNetworkError = class extends Error {
   name = "ChannelNetworkError";
+  /** DSH 的重试分类。不设则记为 UNKNOWN，而 UNKNOWN 不在重试白名单里； */
+  /** 赋成白名单内的 TRANSPORT / TIMEOUT，瞬时网络抖动才会被重试。 */
+  code;
 };
 function networkFailure(error, route) {
   if (error instanceof Error && (error.name === "AbortError" || error.name === "TimeoutError")) return error;
@@ -59655,7 +59658,9 @@ function networkFailure(error, route) {
     if (typeof record.code === "string" && /^[A-Z][A-Z0-9_]{1,80}$/.test(record.code)) codes.add(record.code);
     current = record.cause;
   }
-  return new ChannelNetworkError(`\u6E20\u9053\u7F51\u7EDC\u8BF7\u6C42\u5931\u8D25\uFF08${route}${codes.size ? `\uFF1B${[...codes].join("\u3001")}` : ""}\uFF09\uFF1A\u8BF7\u68C0\u67E5\u4EE3\u7406\u8FDE\u901A\u6027\u540E\u91CD\u8BD5`, { cause: error });
+  const failure = new ChannelNetworkError(`\u6E20\u9053\u7F51\u7EDC\u8BF7\u6C42\u5931\u8D25\uFF08${route}${codes.size ? `\uFF1B${[...codes].join("\u3001")}` : ""}\uFF09\uFF1A\u8BF7\u68C0\u67E5\u4EE3\u7406\u8FDE\u901A\u6027\u540E\u91CD\u8BD5`, { cause: error });
+  failure.code = codes.has("ETIMEDOUT") ? "TIMEOUT" : "TRANSPORT";
+  return failure;
 }
 function createChannelFetch(options = {}) {
   const dispatchers = /* @__PURE__ */ new Map();
