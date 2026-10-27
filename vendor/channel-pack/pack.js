@@ -23206,7 +23206,7 @@ var require_fetch = __commonJS({
             fetchParams.controller.terminate(e);
           }
         };
-        requestBody = async function* () {
+        requestBody = (async function* () {
           try {
             for await (const bytes of request.body.stream) {
               yield* processBodyChunk(bytes);
@@ -23215,7 +23215,7 @@ var require_fetch = __commonJS({
           } catch (err) {
             processBodyError(err);
           }
-        }();
+        })();
       }
       try {
         const { body, status, statusText, headersList, socket } = await dispatch({ body: requestBody });
@@ -31349,7 +31349,7 @@ function ownerOf(ids, candidate) {
   return typeof candidate === "string" && ids.includes(candidate) ? candidate : ids[0];
 }
 function trackStream(provider, inner, modelId) {
-  return async function* tracked() {
+  return (async function* tracked() {
     try {
       yield* inner;
     } catch (error) {
@@ -31358,7 +31358,7 @@ function trackStream(provider, inner, modelId) {
       }
       throw error;
     }
-  }();
+  })();
 }
 function withDeadModelPruning(providers, adapter) {
   const ids = providers.filter((id) => typeof id === "string" && id.length > 0);
@@ -45332,6 +45332,7 @@ var ZcodeCaptchaBrowser = class {
   }
   /** 归还页面（保留复用）。 */
   releasePage(page) {
+    void page;
     this.pageBusy = false;
   }
   /**
@@ -46248,6 +46249,7 @@ async function pollZcodeLogin(flow, fetchImpl = fetch, appVersion = "3.14.3") {
       signal: AbortSignal.timeout(2e4)
     });
   } catch (error) {
+    void error;
     return { kind: "pending" };
   }
   if (response.status >= 400 && response.status < 500 && response.status !== 408 && response.status !== 429) {
@@ -46818,6 +46820,7 @@ function buildChannelRequest(credential, channel, body) {
   const token = channel === "coding-plan" ? credential.coding_plan_key_zai ?? credential.coding_plan_key_bigmodel : credential.zcode_jwt;
   if (typeof token === "string" && token.length > 0) headers.Authorization = `Bearer ${token}`;
   if (channel === "coding-plan") delete headers["HTTP-Referer"];
+  void body;
   return { url: zcodeMessagesUrl(channel), headers };
 }
 var API_KEY_NAME = "zcode-api-key";
@@ -48110,6 +48113,8 @@ var ZcodeAuth = class extends Service7 {
       await this.ctx.credentials.set(refName, JSON.stringify(own));
       return;
     }
+    void pool;
+    void accountId;
     throw new Error(
       `ZCode \u8D26\u53F7\uFF08${refName}\uFF09\u7684\u51ED\u636E\u4E0D\u53EF\u7528\u6216\u5DF2\u635F\u574F\uFF0C\u8BF7\u91CD\u65B0\u767B\u5F55\u8BE5\u8D26\u53F7\uFF08\u672C\u63D2\u4EF6\u4E0D\u4F1A\u7528\u5176\u5B83\u8D26\u53F7\u7684\u51ED\u636E\u8986\u76D6\u5B83\uFF09\u3002`
     );
@@ -49657,6 +49662,7 @@ function isZcodeQuotaExhausted(status, body) {
   return /exceed\s+quota\s+limit|quota\s+(?:has\s+been\s+)?exhausted/i.test(body);
 }
 function isZcodeCaptchaRejected(status, body) {
+  void status;
   return body.includes("3007") || /captcha\s+verify\s+failed/i.test(body);
 }
 function zcodeConcurrencyRetryDelayMs(attempt, baseMs) {
@@ -52689,6 +52695,7 @@ var GeminiAdapter = class extends LlmAdapter8 {
     } finally {
       await sigStore?.flush().catch(() => {
       });
+      void lastFailure;
     }
   }
   /**
@@ -52725,6 +52732,9 @@ var TRAE_PROVIDER_ID = "trae";
 var PROBE_PROMPT = "\u53EA\u56DE\u7B54\u4E24\u4E2A\u5B57\uFF1A\u6536\u5230";
 var PROBE_SYSTEM = "You are a helpful assistant.";
 var PROBE_TIMEOUT_MS = 12e4;
+var PROBE_CANDIDATES_MAX = 4;
+var PROBE_ATTEMPT_TIMEOUT_MS = 2e4;
+var PROBE_TOTAL_BUDGET_MS = 8e4;
 function isRateLimitFailure(error) {
   if (error instanceof LlmError16) {
     if (error.code === "RATE_LIMIT" || error.code === "QUOTA_EXCEEDED" || error.code === "QUOTA") return true;
@@ -52734,6 +52744,7 @@ function isRateLimitFailure(error) {
 }
 async function probeWithAdapter(entry, credential, modelId, timeoutMs) {
   if (!isSupportedProvider(entry.provider)) throw new Error("provider-unsupported: \u4E0D\u652F\u6301\u6B64\u6E20\u9053");
+  const startedAt = Date.now();
   const signal = AbortSignal.timeout(timeoutMs);
   const ref = credentialRef8(entry.credentialRef);
   const lobsteraiProduct = lobsteraiProductById(entry.provider);
@@ -52773,6 +52784,14 @@ async function probeWithAdapter(entry, credential, modelId, timeoutMs) {
       },
       product: zcodeProduct
     });
+  } else if (entry.provider === LOOMY.id) {
+    adapter = new LoomyAdapter({
+      credentialRef: ref,
+      resolveCredential: async () => credential,
+      refresh: async () => {
+      },
+      product: LOOMY
+    });
   } else if (entry.provider === TRAE_PROVIDER_ID) {
     adapter = new TraeAdapter({
       credentialRef: ref,
@@ -52807,7 +52826,7 @@ async function probeWithAdapter(entry, credential, modelId, timeoutMs) {
       signal
     })) {
     }
-    return { modelId, ok: true };
+    return { modelId, ok: true, ms: Date.now() - startedAt };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     if (isRateLimitFailure(error)) {
@@ -52816,10 +52835,11 @@ async function probeWithAdapter(entry, credential, modelId, timeoutMs) {
         modelId,
         ok: false,
         message: `\u4ECD\u53D7\u9650\uFF1A${message}`,
-        ...parsed !== null ? { resetTimeMs: parsed.resetTimeMs } : {}
+        ...parsed !== null ? { resetTimeMs: parsed.resetTimeMs } : {},
+        ms: Date.now() - startedAt
       };
     }
-    return { modelId, ok: false, message: `\u65E0\u6CD5\u786E\u8BA4\uFF1A${message}` };
+    return { modelId, ok: false, message: `\u65E0\u6CD5\u786E\u8BA4\uFF1A${message}`, ms: Date.now() - startedAt };
   }
 }
 function makeDefaultProbe(pool, timeoutMs) {
@@ -52871,11 +52891,39 @@ async function retestAllAccounts(pool, provider, deps = {}) {
     clearedCount: accounts.reduce((sum, a) => sum + a.cleared.length, 0)
   };
 }
-function pickTestModel(entry, catalogIds, requested) {
-  if (typeof requested === "string" && requested !== "") return requested;
-  const marked = Object.keys(entry.modelRateLimits ?? {})[0];
-  if (marked !== void 0) return marked;
-  return catalogIds[0] ?? "";
+function pickTestModels(entry, catalogIds, requested, max = PROBE_CANDIDATES_MAX) {
+  if (typeof requested === "string" && requested !== "") return [requested];
+  const seen = /* @__PURE__ */ new Set();
+  const picked = [];
+  for (const id of [...Object.keys(entry.modelRateLimits ?? {}), ...catalogIds]) {
+    if (id === "" || seen.has(id)) continue;
+    seen.add(id);
+    picked.push(id);
+    if (picked.length >= max) break;
+  }
+  return picked;
+}
+async function testAccountCandidates(pool, accountId, modelIds, deps = {}) {
+  const startedAt = Date.now();
+  const tried = [];
+  let value;
+  for (const [index, modelId] of modelIds.entries()) {
+    const remaining = PROBE_TOTAL_BUDGET_MS - (Date.now() - startedAt);
+    if (remaining <= 0) break;
+    const timeoutMs = index === modelIds.length - 1 ? remaining : Math.min(remaining, PROBE_ATTEMPT_TIMEOUT_MS);
+    const outcome = await testAccount(pool, accountId, modelId, { ...deps, timeoutMs });
+    tried.push({ modelId: outcome.modelId, ok: outcome.ok, ...outcome.message === void 0 ? {} : { message: outcome.message } });
+    value ??= outcome;
+    if (outcome.ok) {
+      value = outcome;
+      break;
+    }
+  }
+  return {
+    ...value ?? { accountId, modelId: modelIds[0] ?? "", ok: false, message: "\u6CA1\u6709\u53EF\u6D4B\u8BD5\u7684\u6A21\u578B" },
+    ms: Date.now() - startedAt,
+    tried
+  };
 }
 async function testAccount(pool, accountId, modelId, deps = {}) {
   const entry = pool.findAccount(accountId);
@@ -53185,7 +53233,7 @@ async function openSocks5Tunnel(proxy, host, port) {
 }
 function buildSocksDispatcher(proxy) {
   return new import_undici.Agent({
-    connect: (opts, callback) => {
+    connect: ((opts, callback) => {
       const host = String(opts.hostname ?? opts.host ?? "");
       const port = Number(opts.port ?? 443);
       if (host.length === 0) {
@@ -53197,7 +53245,7 @@ function buildSocksDispatcher(proxy) {
       }).catch((error) => {
         callback(error, void 0);
       });
-    }
+    })
   });
 }
 
@@ -53950,6 +53998,7 @@ function computeClaimSummary(outcomes) {
         break;
       default: {
         const exhaustive = outcome;
+        void exhaustive;
         summary.failed += 1;
         break;
       }
@@ -55039,8 +55088,8 @@ function registerChannelPackEndpoints(ctx, pool, lobsterai, qoder, qoderCn, trae
         if (entry === void 0) {
           return { ok: false, error: { code: "bad-request", message: `\u8D26\u53F7 ${accountId} \u4E0D\u5B58\u5728` } };
         }
-        let modelId = pickTestModel(entry, [], req.modelId);
-        if (modelId === "") {
+        let candidates = pickTestModels(entry, [], req.modelId);
+        if (candidates.length === 0) {
           const catalog = await fullCatalogIds(ctx, modelAdapters, entry.provider);
           if ("error" in catalog) {
             return {
@@ -55048,15 +55097,15 @@ function registerChannelPackEndpoints(ctx, pool, lobsterai, qoder, qoderCn, trae
               error: { code: "bad-request", message: `\u65E0\u6CD5\u786E\u5B9A\u8981\u6D4B\u8BD5\u7684\u6A21\u578B\uFF1A${catalog.error}` }
             };
           }
-          modelId = pickTestModel(entry, catalog.ids, req.modelId);
+          candidates = pickTestModels(entry, catalog.ids, req.modelId);
         }
-        if (modelId === "") {
+        if (candidates.length === 0) {
           return {
             ok: false,
             error: { code: "bad-request", message: `${entry.provider} \u6CA1\u6709\u53EF\u6D4B\u8BD5\u7684\u6A21\u578B` }
           };
         }
-        const value = await testAccount(pool, accountId, modelId);
+        const value = await testAccountCandidates(pool, accountId, candidates);
         return { ok: true, value };
       }
       // ── 限流标记：重置（不发请求，直接清除）──
