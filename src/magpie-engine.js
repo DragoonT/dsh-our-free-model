@@ -226,7 +226,15 @@ async function ownerLease(home) {
         throw engineError('Engine owner lock has an unsupported format')
       }
       let lease
-      try { lease = await bindLease(saved.port) } catch {
+      try { lease = await bindLease(saved.port) } catch (error) {
+        if (error?.code === 'EACCES' || error?.code === 'EPERM') {
+          // Windows reserves whole port ranges (winnat/Hyper-V/WSL) that drift
+          // across reboots. A saved lease port inside one is unusable on this
+          // boot, not owned: only a live listener reports EADDRINUSE. Drop the
+          // stale record and take a fresh lease instead of failing startup (#688).
+          await unlink(file).catch(() => {})
+          continue
+        }
         throw engineError('Magpie data directory already has an owner or its lease port is occupied')
       }
       try {
@@ -721,11 +729,15 @@ export function createMagpieEngine({ dataDir, logger, binary } = {}) {
         throw engineError('Saved engine gateway port is invalid')
       }
       if (gatewayPort !== undefined) {
-        let reservation
-        try { reservation = await bindLease(gatewayPort) } catch {
-          throw engineError('Saved engine gateway port is occupied; close the conflicting listener before restarting')
+        try {
+          const reservation = await bindLease(gatewayPort)
+          await closeLease(reservation)
+        } catch {
+          // The saved port is a preference, not a requirement: another listener
+          // or a Windows reserved range that drifted across reboots (#688) must
+          // not block startup. Take a fresh port; it is persisted right below.
+          gatewayPort = await freePort()
         }
-        await closeLease(reservation)
       } else gatewayPort = await freePort()
       let webPort = await freePort()
       while (webPort === gatewayPort) webPort = await freePort()
