@@ -1,7 +1,7 @@
 {
   "version": "2.7.3",
   "base": "../",
-  "publishedAt": "2026-10-30T06:56:12.414Z",
+  "publishedAt": "2026-10-31T00:15:29.733Z",
   "notes": "",
   "files": [
     {
@@ -16,8 +16,8 @@
     },
     {
       "path": "client.js",
-      "size": 564532,
-      "sha256": "d65215dbb252a8d1514a42a59decc5430b79ffa563fc11129c2db8c99379e8c4"
+      "size": 564562,
+      "sha256": "323de968e37d951b1aae6855e0bee7ad041de5793595a5c746dcccf4ac2e5555"
     },
     {
       "path": "cordis.patch.yml",
@@ -206,8 +206,8 @@
     },
     {
       "path": "src/forward.js",
-      "size": 62962,
-      "sha256": "e4f2e99712e88056ec4c12506b11ac3622b205bc5cd674281ba62225128d18b7"
+      "size": 64454,
+      "sha256": "7f0d6fa748985bda19eb6536d444eea5151ac243a33f6b2883292d249867e1b6"
     },
     {
       "path": "src/gemini.js",
@@ -286,8 +286,8 @@
     },
     {
       "path": "src/providers/registry.json",
-      "size": 124782,
-      "sha256": "bfb03a1621714463e1c4157f2273006f5740dd10adcf650018f80782db1edaa0"
+      "size": 125713,
+      "sha256": "eac3f051402af982901790a340d0430eb1a2981b7c3fd4a93c33b732f56a8098"
     },
     {
       "path": "src/push.js",
@@ -381,8 +381,8 @@
     },
     {
       "path": "vendor/channel-pack/pack.js",
-      "size": 2614693,
-      "sha256": "ecb144bcae50bd9917c3adeab38db34e58d326707c00a2e974863ad8c991d171"
+      "size": 2615081,
+      "sha256": "794541554b778f48cb949f705832913a169ea1ec1f4f736fcc7d44c1000b987e"
     },
     {
       "path": "vendor/channel-pack/qoder-auth-wasm.wasm",
@@ -405,5 +405,5 @@
       "sha256": "b2cbbd38d5461521f40d8fbd947bfa9be641481602eaec0f1fc5d29cca8d7e5f"
     }
   ],
-  "signature": "R3ZOxK/48feks6xQE30OHlWt0uaowU9GEkHwuheXedGeYzPbv2WGZ4ZGYeJDeK1/AjCELTN3m3pPiKkIBG/zAQ=="
+  "signature": "3fGYVzaFNC2rJuRPHn8GKxbz6+zpyq+El8SFlRbLwkfHLPYxUUlJ9Ff0mMUkV+5EwAiEtaLyM3cRqoqEbqIjCw=="
 }
