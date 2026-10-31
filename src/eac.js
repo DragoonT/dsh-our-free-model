@@ -31,7 +31,6 @@ import { Readable } from 'node:stream'
 // Web-stream adapter: http.js's readHead/readSse speak getReader(), so the
 // node:http response is converted into a proper WHATWG ReadableStream.
 import { ReadableStream } from 'node:stream/web'
-import { fetch as undiciFetch, EnvHttpProxyAgent } from 'undici'
 import { CODE, UpstreamError, classifyFailure, classifyStreamFailure, readHead, readSse, replayStream, sniffBody, transportCause } from './http.js'
 import { readEacUser } from './eac-user.js'
 
@@ -121,12 +120,32 @@ async function proxyFor(target) {
   return config === null ? null : supportedProxy(windowsProxyFor(target, config))
 }
 
-function dispatcherFor(address) {
+// The proxy path needs undici's proxy-aware dispatcher. undici ships only as a
+// dev dependency (the DSH host does not hand it to every plugin), so it loads
+// on first proxy use. A configured proxy without it must fail loudly instead
+// of silently falling back to a direct connection — that would leak the signed
+// bytes (and the user's address) past the proxy they asked for.
+let undiciModule
+async function loadUndici() {
+  if (undiciModule === undefined) {
+    try { undiciModule = await import('undici') } catch { undiciModule = null }
+  }
+  return undiciModule
+}
+
+async function dispatcherFor(address) {
   const url = new URL(String(address).includes('://') ? String(address) : `http://${address}`)
   if (url.protocol !== 'http:' && url.protocol !== 'https:') throw new Error(`unsupported EAC proxy protocol ${url.protocol}`)
+  const mod = await loadUndici()
+  if (mod === null) {
+    throw new UpstreamError(
+      `an EAC proxy is configured (${url.host}) but undici is unavailable in this host; install undici or clear the proxy`,
+      CODE.transport,
+    )
+  }
   const key = url.href
   if (!proxyDispatchers.has(key)) {
-    proxyDispatchers.set(key, new EnvHttpProxyAgent({ httpProxy: key, httpsProxy: key, noProxy: '' }))
+    proxyDispatchers.set(key, new mod.EnvHttpProxyAgent({ httpProxy: key, httpsProxy: key, noProxy: '' }))
   }
   return proxyDispatchers.get(key)
 }
@@ -176,7 +195,15 @@ async function laneFetch(url, { method = 'GET', headers = {}, body = undefined, 
   const proxy = await proxyFor(target)
   if (signal?.aborted === true) throw new UpstreamError('request aborted', CODE.aborted)
   if (proxy) {
-    return undiciFetch(target, { method, headers, body, signal, redirect: 'manual', dispatcher: dispatcherFor(proxy) })
+    if ((await loadUndici()) === null) {
+      throw new UpstreamError(
+        `an EAC proxy is configured (${new URL(proxy).host}) but undici is unavailable in this host; install undici or clear the proxy`,
+        CODE.transport,
+      )
+    }
+    return (await loadUndici()).fetch(target, {
+      method, headers, body, signal, redirect: 'manual', dispatcher: await dispatcherFor(proxy),
+    })
   }
   return new Promise((resolve, reject) => {
     const transport = target.protocol === 'http:' ? http : https
