@@ -6954,14 +6954,31 @@ window.__ModuleLoader__.load({
         const escape = event => {
           if (event.key === 'Escape') setExpanded(false)
         }
+        // The engine page is an iframe: once focus is inside it, key events go
+        // to the child document and the parent listener never sees them, so
+        // Escape did nothing in exactly the state the panel spends its time in.
+        // Listen on the frame's document too; same-origin, so it is reachable.
+        let frameEscape = null
+        const bindFrame = () => {
+          try {
+            const doc = frame.current?.contentDocument
+            if (!doc || frameEscape) return
+            frameEscape = doc
+            doc.addEventListener('keydown', escape)
+          } catch { /* cross-origin engine page: the parent listener still applies */ }
+        }
+        bindFrame()
+        const frameTimer = setInterval(bindFrame, 400)
         const focus = event => {
           if (!host.contains(event.target)) closeButton.current?.focus()
         }
         window.addEventListener('keydown', escape)
         document.addEventListener('focusin', focus)
         return () => {
+          clearInterval(frameTimer)
           window.removeEventListener('keydown', escape)
           document.removeEventListener('focusin', focus)
+          try { frameEscape?.removeEventListener('keydown', escape) } catch { /* frame already gone */ }
           if (root) root.inert = wasInert
           host.remove()
           if (focused?.isConnected) focused.focus?.()
@@ -7026,9 +7043,13 @@ window.__ModuleLoader__.load({
               state === 'starting' ? t('engine.starting') : t('engine.failed')),
             state === 'error' ? h(Button, { kind: 'primary', onClick: () => setGeneration(value => value + 1) }, t('engine.start')) : null))
       return h('div', { className: 'ofm_page ofm_engineworkspace', ref: anchor },
-        expanded ? portal ? ReactDOM.createPortal(
+        // While expanded the panel lives in its overlay portal. For the one frame
+        // before the portal host exists it stays inline: rendering `null` in that
+        // gap removed the whole toolbar, and with it the only collapse button —
+        // a missed portal left the workbench stuck open until a restart (#700).
+        expanded && portal ? ReactDOM.createPortal(
           h('div', { className: 'ofm_root ofm_engineoverlay', role: 'dialog', 'aria-modal': 'true',
-            'aria-label': t('engine.title'), 'data-ofm-effects': 'off' }, content), portal) : null : content)
+            'aria-label': t('engine.title'), 'data-ofm-effects': 'off' }, content), portal) : content)
     }
 
     function WorkspacePage({ t, summary, section, onSelect }) {
