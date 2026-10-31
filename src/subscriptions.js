@@ -9,7 +9,7 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import crypto from 'node:crypto'
-import { restrictPermissions as privatePermissions } from './private-file.js'
+import { restrictPermissions as privatePermissions } from './open-external.js'
 
 const PROVIDERS = ['codex', 'claude', 'gemini', 'api']
 const FORMATS = ['openai-chat', 'openai-responses', 'anthropic-messages']

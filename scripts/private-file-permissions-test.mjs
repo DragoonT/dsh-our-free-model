@@ -16,7 +16,7 @@ import { execFileSync } from 'node:child_process'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { restrictPermissions } from '../src/private-file.js'
+import { restrictPermissions } from '../src/open-external.js'
 import { JsonStore } from '../src/store.js'
 import { writeEacUser, readEacUser } from '../src/eac-user.js'
 

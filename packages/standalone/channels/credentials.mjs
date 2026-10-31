@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import crypto from 'node:crypto'
-import { restrictPermissions } from '../../../src/private-file.js'
+import { restrictPermissions } from '../../../src/open-external.js'
 
 /** 独立应用凭据仓库。同步原子写入，失败冒泡；从不读取 DSH 文件。 */
 export function createCredentials(dataDir) {

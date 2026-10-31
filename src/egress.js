@@ -58,7 +58,7 @@ import { randomBytes, timingSafeEqual } from 'node:crypto'
 import { lookup } from 'node:dns/promises'
 import { spawn } from 'node:child_process'
 import { bunFetch, findBunExecutable } from './bun-fetch.js'
-import { restrictPermissions } from './private-file.js'
+import { restrictPermissions } from './open-external.js'
 
 /** The loopback address the relay listens on. Never a routable one. */
 const RELAY_HOST = '127.0.0.1'

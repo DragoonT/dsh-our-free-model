@@ -5,7 +5,7 @@ import crypto from 'node:crypto'
 import { execFile, execFileSync, spawn } from 'node:child_process'
 import { promisify } from 'node:util'
 import { launchClientTerminal } from './client-terminal.mjs'
-import { restrictPermissions } from '../../src/private-file.js'
+import { restrictPermissions } from '../../src/open-external.js'
 
 const CLIENTS = [
   { id: 'codex', name: 'Codex CLI', kind: 'cli', command: 'codex' },

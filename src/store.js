@@ -19,7 +19,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
-import { restrictPermissions } from './private-file.js'
+import { restrictPermissions } from './open-external.js'
 
 /** Same resolution the harness home-paths helper uses: `$DSH_HOME` else `~/.dsh`. */
 export function resolveDshHome() {

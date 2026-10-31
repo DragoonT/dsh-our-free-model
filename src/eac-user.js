@@ -20,7 +20,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { resolveDshHome, DATA_DIR_NAME } from './store.js'
-import { restrictPermissions } from './private-file.js'
+import { restrictPermissions } from './open-external.js'
 
 export const EAC_USER_FILE = 'eac-user.json'
 

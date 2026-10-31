@@ -5,7 +5,7 @@ import net from 'node:net'
 import os from 'node:os'
 import { execFile, spawn as spawnProcess } from 'node:child_process'
 import { promisify } from 'node:util'
-import { restrictPermissions } from '../../src/private-file.js'
+import { restrictPermissions } from '../../src/open-external.js'
 
 const runFile = promisify(execFile)
 const encode = value => Buffer.from(value, 'utf16le').toString('base64')

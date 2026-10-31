@@ -28,7 +28,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import crypto from 'node:crypto'
-import { restrictPermissions } from './private-file.js'
+import { restrictPermissions } from './open-external.js'
 
 const REPO = 'Ebony-Vinyl/dsh-our-free-model'
 /** This package's own name, as a package manager records it in the profile. */

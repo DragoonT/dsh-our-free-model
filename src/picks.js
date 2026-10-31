@@ -19,7 +19,7 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-import { restrictPermissions } from './private-file.js'
+import { restrictPermissions } from './open-external.js'
 
 /** The repositories the page advertises, in display order. */
 export const PICK_REPOS = Object.freeze([

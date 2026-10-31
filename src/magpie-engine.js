@@ -6,7 +6,7 @@ import http from 'node:http'
 import net from 'node:net'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { restrictPermissions } from './private-file.js'
+import { restrictPermissions } from './open-external.js'
 import { loopbackFetch } from './loopback-fetch.js'
 import { hasEnginePayload, materializeEngine } from './engine-payload.js'
 import {

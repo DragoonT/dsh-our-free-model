@@ -1,4 +1,5 @@
-import { execFile } from 'node:child_process'
+import { execFile, execFileSync } from 'node:child_process'
+import fs from 'node:fs'
 import path from 'node:path'
 import { promisify } from 'node:util'
 
@@ -32,4 +33,16 @@ export async function openExternal(value, {
     }
     return true
   } catch { return false }
+}
+
+export function restrictPermissions(file, directory = false) {
+  if (process.platform !== 'win32') return fs.chmodSync(file, directory ? 0o700 : 0o600)
+  const system32 = path.join(process.env.SystemRoot ?? 'C:\\Windows', 'System32')
+  // whoami prints the account in the OEM code page, which corrupts non-ASCII
+  // machine names once decoded as UTF-8; Node reads env vars through the
+  // UTF-16 APIs, so USERNAME is always a correct Unicode string.
+  const user = process.env.USERNAME ?? ''
+  execFileSync(path.join(system32, 'icacls.exe'),
+    [file, '/inheritance:r', '/grant:r', `${user}:${directory ? '(OI)(CI)F' : 'F'}`],
+    { stdio: 'ignore', windowsHide: true, shell: false })
 }
