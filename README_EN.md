@@ -101,7 +101,7 @@ the picker by itself as soon as a probe gets through.
 
 ## Install
 
-> **⚠️ Do not install this plugin from npm.**
+> **⚠️ Do not install the bare `dsh-our-free-model` package from npm.**
 >
 > The `dsh-our-free-model` package on npm **is not published by this repository.**
 > It is a third-party repackaging whose contents do not match this tree:
@@ -110,8 +110,18 @@ the picker by itself as soon as a probe gets through.
 > a build this project did not review, and you lose the signed-manifest
 > verification and in-app upgrades that this repository provides.
 >
-> Install only the ways documented below: a release package from this repository,
-> or a local source directory. For any same-named package from another channel,
+> This repository publishes the scoped **`@ebony-vinyl/dsh-our-free-model`**, built
+> from the same tree and version as the release `dsh-our-free-model-<version>.tgz`.
+> If you prefer npm:
+>
+> ```
+> dsh plugin --profile web add @ebony-vinyl/dsh-our-free-model@2.7.4
+> ```
+>
+> Its bundle id carries the scope (`@ebony-vinyl/dsh-our-free-model`), so it cannot
+> be mixed with the bare-name local install below in one profile — pick one.
+>
+> For any same-named package from another channel,
 > this repository is the source of truth.
 
 ### Command line (plain `dsh web`)

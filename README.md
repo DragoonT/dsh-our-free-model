@@ -115,15 +115,25 @@ Chat Completions、Responses API，以及独立网页管理（模型、统计、
 
 ## 安装
 
-> **⚠️ 不要通过 npm 安装本插件。**
+> **⚠️ 不要安装 npm 上那个裸名的 `dsh-our-free-model`。**
 >
 > npm 上的 `dsh-our-free-model` 包**不是本仓库发布的**。它由第三方打包，内容与本仓库
 > 不一致：`index.js`、`client.js` 被改动，并额外包含本仓库从未有过的
 > `src/channel-visibility.js`。装到它得不到本项目审核过的构建，也拿不到本仓库的签名
 > 清单校验与应用内升级。
 >
-> 请只按本文档下方的方式安装：使用本仓库的 Release 发布包，或本地源码目录。
+> 本仓库自己发布的是带 scope 的 **`@ebony-vinyl/dsh-our-free-model`**，与 Release 的
+> `dsh-our-free-model-<版本>.tgz` 同源、同版本。只想走 npm 时可以装它：
+>
+> ```
+> dsh plugin --profile web add @ebony-vinyl/dsh-our-free-model@2.7.4
+> ```
+>
+> 注意它的包名带 scope，因此挂载条目是 `@ebony-vinyl/dsh-our-free-model`，与下文
+> 裸包名的本地安装方式不能混用（同一个 profile 里只选一种）。
+>
 > 其它渠道出现的同名包一律以本仓库为准。
+
 
 **命令行（纯 dsh web）**
 
