@@ -38,9 +38,9 @@
 ## Community
 
 <div align="center">
-  <img src="docs/images/qq-group-974582805.png" alt="QR code for OFM技术交流[2群] (QQ group: 974582805)" width="300">
+  <img src="docs/images/qq-group-1049452906.jpg" alt="QR code for OFM技术交流[19] (QQ group: 1049452906)" width="300">
   <br>
-  <b>QQ group: 974582805 (OFM技术交流[2群])</b>
+  <b>QQ group: 1049452906 (OFM技术交流[19])</b>
   <br>
   Scan the QR code to join, discuss the plugin, report issues and share tips.
 </div>
