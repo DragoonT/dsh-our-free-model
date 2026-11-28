@@ -37,9 +37,9 @@
 ## 交流群
 
 <div align="center">
-  <img src="docs/images/qq-group-974582805.png" alt="OFM技术交流[2群]入群二维码（群号：974582805）" width="300">
+  <img src="docs/images/qq-group-1049452906.jpg" alt="OFM技术交流[19]入群二维码（群号：1049452906）" width="300">
   <br>
-  <b>QQ 群：974582805（OFM技术交流[2群]）</b>
+  <b>QQ 群：1049452906（OFM技术交流[19]）</b>
   <br>
   扫码加入群聊，一起交流插件使用心得、反馈问题与分享玩法。
 </div>
